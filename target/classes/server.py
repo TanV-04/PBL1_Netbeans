@@ -296,11 +296,13 @@ app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # Limit to 100 MB
 # tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
 # model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn")
 
-# Load summarization model directly
+# Load translation model directly
+model_translation = MBartForConditionalGeneration.from_pretrained("Varosa/mbart-many-to-many")
+tokenizer_translation = MBart50TokenizerFast.from_pretrained("Varosa/mbart-many-to-many")
+
 
 tokenizer = AutoTokenizer.from_pretrained("mrm8488/t5-base-finetuned-summarize-news")
 
-# Remember
 model = None
 try:
     model = AutoModelForSeq2SeqLM.from_pretrained(
@@ -310,16 +312,7 @@ try:
 except:
     print("Error")
 
-# tokenizer = AutoTokenizer.from_pretrained(
-#     "BeenaSamuel/t5_cnn_daily_mail_abstractive_summarizer_v2"
-# )
-# model = AutoModelForSeq2SeqLM.from_pretrained(
-#     "BeenaSamuel/t5_cnn_daily_mail_abstractive_summarizer_v2"
-# )
 
-# load the translator model
-
-# Remember
 try:
     model_translation = MBartForConditionalGeneration.from_pretrained(
         "Varosa/mbart-many-to-many"
@@ -330,14 +323,6 @@ except:
 tokenizer_translation = MBart50TokenizerFast.from_pretrained(
     "Varosa/mbart-many-to-many"
 )
-
-
-# model_translation = MBartForConditionalGeneration.from_pretrained("sanjitaa/mbart-many-to-many")
-# tokenizer_translation = MBart50TokenizerFast.from_pretrained("sanjitaa/mbart-many-to-many")
-
-# load the text_to_speech model
-# processor = AutoProcessor.from_pretrained("sumedh/wav2vec2-large-xlsr-marathi")
-# model_speech = AutoModelForCTC.from_pretrained("sumedh/wav2vec2-large-xlsr-marathi")
 
 TEXT = ""
 

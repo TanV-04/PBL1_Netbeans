@@ -59,6 +59,7 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 formMouseEntered(evt);
@@ -114,6 +115,8 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         responseTextArea.setColumns(20);
         responseTextArea.setRows(5);
         responseTextArea.setEditable(false);
+        responseTextArea.setLineWrap(true);
+        responseTextArea.setWrapStyleWord(true);
         jScrollPane1.setViewportView(responseTextArea);
 
         jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 330, 430, 240));
