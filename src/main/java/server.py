@@ -60,8 +60,9 @@ TEXT = ""
 
 @app.route("/summarize", methods=["POST"])
 def summarize_text():
+    print("hi")
     global TEXT
-    data = request.json
+#    data = request.json
     # text = data["text"]
     text = TEXT
     inputs = tokenizer(text, return_tensors="pt", max_length=1024, truncation=True)
@@ -80,21 +81,26 @@ def summarize_text():
 # for the varosa model (best one yet)
 @app.route("/translate", methods=["POST"])
 def translate_text():
+    print("hi")
+    
     global TEXT
-    data = request.json
+#    data = request.json
     text = TEXT
     # text = data["text"]
     tokenizer_translation.src_lang = "en_XX"
     tokenizer_translation.tgt_lang = "mr_IN"
     encoded_text = tokenizer_translation(text, return_tensors="pt")
+    print("hi2")
     generated_tokens = model_translation.generate(
         **encoded_text,
         forced_bos_token_id=tokenizer_translation.lang_code_to_id["mr_IN"]
     )
+    print("h3")
     translated_text = tokenizer_translation.batch_decode(
         generated_tokens, skip_special_tokens=True
     )[0]
-    print("translated text: ", translated_text.replace(" \u094D ", "\u094D"))
+    print("h4")
+#    print("translated text: ", translated_text.replace(" \u094D ", "\u094D"))
     return translated_text.replace(" \u094D ", "\u094D")
 
 
