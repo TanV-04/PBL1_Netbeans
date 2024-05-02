@@ -5,12 +5,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import org.json.JSONObject;
@@ -70,6 +75,11 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         Convert_Text_To_Speech.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         Convert_Text_To_Speech.setText("Convert Text to Speech");
         Convert_Text_To_Speech.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        Convert_Text_To_Speech.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Convert_Text_To_SpeechActionPerformed(evt);
+            }
+        });
 
         responseTextArea.setColumns(20);
         responseTextArea.setRows(5);
@@ -151,7 +161,7 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         new Thread(() -> {
             try {
                 @SuppressWarnings("deprecation")
-                URL url = new URL("http://127.0.0.1:5000/summarize");
+                URL url = new URL("http://127.0.0.1:8080/summarize");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
@@ -184,17 +194,16 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
 
     private void Extract_TextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Extract_TextActionPerformed
 
-        //String serverUrl = "http://127.0.0.1:5000/extract_text"; // Change this to your Flask server URL
+        //String serverUrl = "http://127.0.0.1:8080/extract_text"; // Change this to your Flask server URL
         // String filePath = "./Dashboard.png"; // Change this to the path of your image
         // file
-
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Choose Image File: ");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File imageFile = fileChooser.getSelectedFile();
-            String serverUrl = "http://127.0.0.1:5000/extract_text";
+            String serverUrl = "http://127.0.0.1:8080/extract_text";
 
             try {
                 URL url = new URL(serverUrl);
@@ -259,7 +268,7 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         new Thread(() -> {
             try {
                 @SuppressWarnings("deprecation")
-                URL url = new URL("http://127.0.0.1:5000/translate"); // Change the URL to the translation endpoint
+                URL url = new URL("http://127.0.0.1:8080/translate"); // Change the URL to the translation endpoint
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
@@ -298,7 +307,7 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         new Thread(() -> {
             try {
                 @SuppressWarnings("deprecation")
-                URL url = new URL("http://127.0.0.1:5000/summarize_and_translate");
+                URL url = new URL("http://127.0.0.1:8080/summarize_and_translate");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
@@ -330,6 +339,68 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
             }
         }).start();
     }//GEN-LAST:event_Summarize_and_translateActionPerformed
+
+    private void Convert_Text_To_SpeechActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Convert_Text_To_SpeechActionPerformed
+        // TODO add your handling code here:
+        //String text = inputTextField.getText();
+        // String preprocessedText = preprocessText(text);
+        new Thread(() -> {
+            try {
+                javax.sound.sampled.AudioInputStream audioInputStream = null;
+                @SuppressWarnings("deprecation")
+                URL url = new URL("http://127.0.0.1:8080/convert_to_speech"); // Change the URL to the translation endpoint
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                //connection.setRequestProperty("Content-Type", "application/json");
+                connection.setDoOutput(true);
+
+//                String jsonInputString = "{\"text\": \"" + text + "\"}";
+//                try (OutputStream os = connection.getOutputStream()) {
+//                    byte[] input = jsonInputString.getBytes("utf-8");
+//                    os.write(input, 0, input.length);
+//                }
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    java.io.InputStream inputStream = connection.getInputStream();
+                    try {
+                        AudioSystem.getAudioInputStream(inputStream);
+                    } catch(UnsupportedAudioFileException e) {
+                        e.printStackTrace();
+                    }
+                    
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                    in.close();
+
+                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_text.txt");
+
+                    // play the audio
+                    try {
+
+                        Clip clip = AudioSystem.getClip();
+                        clip.open(audioInputStream);
+                        clip.start();
+
+                        // clean up resources
+                        inputStream.close();
+                        audioInputStream.close();
+                    } catch (LineUnavailableException e) {
+                        SwingUtilities.invokeLater(() -> responseTextArea.setText("LineUnavailableException: " + e.getMessage()));
+                    }
+
+                } else {
+                    SwingUtilities.invokeLater(() -> responseTextArea.setText("Error: " + responseCode));
+                }
+            } catch (IOException e) {
+                SwingUtilities.invokeLater(() -> responseTextArea.setText("Exception: " + e.getMessage()));
+            }
+        }).start();
+    }//GEN-LAST:event_Convert_Text_To_SpeechActionPerformed
 
     public void saveToFile(String text, String fileName) {
         try {

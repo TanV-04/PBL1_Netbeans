@@ -390,6 +390,8 @@ def translate_text():
 
 def translate_text_for_combined(summary):  # only for the summarize_and_translate button
     # data = request.json
+    print("hi")
+    global TEXT 
     summary = TEXT
     # summary = data["text"]
     tokenizer_translation.src_lang = "en_XX"
@@ -402,13 +404,16 @@ def translate_text_for_combined(summary):  # only for the summarize_and_translat
     translated_text = tokenizer_translation.batch_decode(
         generated_tokens, skip_special_tokens=True
     )[0]
-    print("translated text: ", translated_text.replace(" \u094D ", "\u094D"))
+#    print("translated text: ", translated_text.replace(" \u094D ", "\u094D"))
 
     return translated_text
 
 
 def summarize_text_for_combined(summ):  # only for the summarize_and_translate button
     # data = request.json
+    print("hi")
+    global TEXT
+    
     summ = TEXT
     # summ = data["text"]
     inputs = tokenizer(summ, return_tensors="pt", max_length=1024, truncation=True)
@@ -427,6 +432,8 @@ def summarize_text_for_combined(summ):  # only for the summarize_and_translate b
 @app.route("/summarize_and_translate", methods=["POST"])
 def summarize_and_translate():
     # data = request.json
+    global TEXT
+    
     text = TEXT
     # text = data["text"]
 
