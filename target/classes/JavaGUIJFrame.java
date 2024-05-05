@@ -1,5 +1,8 @@
 
 import java.awt.Desktop;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +20,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import org.json.JSONObject;
 
@@ -196,7 +200,7 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
                     }
                     in.close();
 
-                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_summary_text.txt");
+                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_summary_text.txt", true);
 
                     SwingUtilities.invokeLater(() -> responseTextArea.setText(response.toString()));
                 } else {
@@ -244,7 +248,7 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
                     }
                     in.close();
 
-                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_text.txt");
+                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_text.txt", true);
 
                     // play the audio
                     try {
@@ -297,8 +301,10 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
                     }
                     in.close();
 
-                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_text.txt");
+                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_text.txt", true);
 
+                    Point textAreaLocation = responseTextArea.getLocationOnScreen();
+                    openNotepadPosition(textAreaLocation, "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\translated_text.txt");
                     SwingUtilities.invokeLater(() -> responseTextArea.setText(response.toString()));
                 } else {
                     SwingUtilities.invokeLater(() -> responseTextArea.setText("Error: " + responseCode));
@@ -309,6 +315,31 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         }).start();
     }//GEN-LAST:event_Translate_TextActionPerformed
 
+    private void openNotepadPosition(Point location, String filePath) {
+        if (Desktop.isDesktopSupported()) {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+
+                    File file = new File(filePath);
+                    Desktop.getDesktop().open(file);
+                    System.out.println("TextArea Location: " + location.x + ", " + (location.y + responseTextArea.getHeight() + 10));
+                    // get notepad window
+                    for (Window window : Window.getWindows()) {
+                        if (window instanceof Frame) {
+                            Frame frame = (Frame) window;
+                            if (frame.getTitle().equals(filePath)) {
+                                frame.setLocation(location.x, location.y + responseTextArea.getHeight() + 10);
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+    }
     private void Summarize_TextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Summarize_TextActionPerformed
 
         //String text = inputTextField.getText();
@@ -336,7 +367,7 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
                         response.append(line);
                     }
                     in.close();
-                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\summarized_text.txt");
+                    saveToFile(response.toString(), "C:\\Users\\areta\\OneDrive\\Desktop\\delte\\summarized_text.txt", false);
                     SwingUtilities.invokeLater(() -> responseTextArea.setText(response.toString()));
                 } else {
                     SwingUtilities.invokeLater(() -> responseTextArea.setText("Error: " + responseCode));
@@ -420,15 +451,18 @@ public class JavaGUIJFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_Extract_TextActionPerformed
 
-    public void saveToFile(String text, String fileName) {
+    public void saveToFile(String text, String fileName, boolean openFile) {
         try {
             FileWriter writer = new FileWriter(fileName);
             writer.write(text);
             writer.close();
             System.out.println("File Saved");
 
-            File file = new File(fileName);
-            Desktop.getDesktop().open(file);
+            if (openFile) {
+                File file = new File(fileName);
+                Desktop.getDesktop().open(file);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error saving file." + e.getMessage());
